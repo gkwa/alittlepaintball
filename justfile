@@ -40,10 +40,3 @@ teardown:
     # Clean up existing images
     incus image info alittlepaintball-homebrew &>/dev/null && incus image rm alittlepaintball-homebrew
     incus image info alittlepaintball-homebrew-configured &>/dev/null && incus image rm alittlepaintball-homebrew-configured
-
-fmt:
-    shfmt -w -s -i 4 *.sh
-    packer fmt -recursive .
-    terraform fmt .
-    prettier --ignore-path=.prettierignore --config=.prettierrc.json --write .
-    just --unstable --fmt

@@ -2,45 +2,23 @@
 
 set -e
 
-HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-HOMEBREW_SHELLENV_COMMAND='eval "$('${HOMEBREW_PREFIX}'/bin/brew shellenv)"'
+PROFILE_SCRIPT=/etc/profile.d/homebrew.sh
 
-add_homebrew_shellenv() {
-    local file="$1"
-    if ! grep -q "Setup Homebrew if it exists" "$file"; then
-        echo "
-# Setup Homebrew if it exists
-if [ -d \"$HOMEBREW_PREFIX\" ]; then
-  export PATH=\"/usr/local/bin:\$PATH\"
-  $HOMEBREW_SHELLENV_COMMAND
-else
-  echo \"Homebrew is not installed in the expected location.\" >&2
-fi" >>"$file"
+cat >"${PROFILE_SCRIPT}" <<'EOF'
+if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    
+    # For non-linuxbrew users, provide a wrapper to run brew as linuxbrew user
+    if [ "${USER}" != "linuxbrew" ]; then
+        brew() {
+            sudo --user linuxbrew --login brew "$@"
+        }
     fi
-}
+fi
+EOF
 
-add_root_brew_wrapper() {
-    local file="$1"
-    if [ "$EUID" -eq 0 ] && ! grep -q "Function to run brew as linuxbrew user" "$file"; then
-        echo '
-# Function to run brew as linuxbrew user
-brew() {
-   sudo --user linuxbrew --login brew "$@"
-}
-' >>"$file"
-    fi
-}
+# Set appropriate permissions
+chmod 644 "${PROFILE_SCRIPT}"
 
-add_homebrew_shellenv ~/.bashrc
-add_homebrew_shellenv ~/.profile
-add_homebrew_shellenv "/etc/skel/.profile"
-add_homebrew_shellenv "/etc/skel/.bashrc"
-add_homebrew_shellenv "/root/.profile"
-add_homebrew_shellenv "/root/.bashrc"
-add_homebrew_shellenv "/home/linuxbrew/.bashrc"
-add_homebrew_shellenv "/home/linuxbrew/.profile"
-
-add_root_brew_wrapper "/root/.bashrc"
-add_root_brew_wrapper "/root/.profile"
-
-echo "Homebrew environment configuration completed successfully."
+echo "Homebrew environment configuration has been installed to ${PROFILE_SCRIPT}"
+echo "The changes will take effect on next login or shell restart."
