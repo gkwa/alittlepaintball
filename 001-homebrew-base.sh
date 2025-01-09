@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 
 set -e
 
@@ -45,9 +46,10 @@ EOF
 }
 
 install_homebrew() {
-    local script=$(mktemp -p /tmp homebrew-XXXXXX)
-    chmod a+rx $script
-    cat >$script <<EOF
+    local script
+    script="$(mktemp -p /tmp homebrew-XXXXXX)"
+    chmod a+rx "$script"
+    cat >"$script" <<EOF
 timeout 30s curl --retry 9999 --connect-timeout 1 -sSf https://www.google.com >/dev/null
 export PATH=${HOMEBREW_PREFIX}/bin:\$PATH
 # RedHat/CentOS/Fedora installation
@@ -64,11 +66,11 @@ brew --version
 EOF
     cd /home/linuxbrew
     if [ ! -f "${HOMEBREW_PREFIX}/bin/brew" ]; then
-        sudo --login --user linuxbrew bash -e $script
+        sudo --login --user linuxbrew bash -e "$script"
     else
         echo "Homebrew is already installed. Skipping installation."
     fi
-    rm -f $script
+    rm -f "$script"
 }
 
 install_packages

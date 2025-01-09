@@ -2,7 +2,7 @@
 
 set -e
 
-sudo tee /etc/profile.d/homebrew.sh << 'EOF'
+sudo tee /etc/profile.d/homebrew.sh <<'EOF'
 #!/usr/bin/env bash
 
 [ ! -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && return
