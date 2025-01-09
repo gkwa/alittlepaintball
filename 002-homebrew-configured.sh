@@ -2,23 +2,18 @@
 
 set -e
 
-PROFILE_SCRIPT=/etc/profile.d/homebrew.sh
+sudo tee /etc/profile.d/homebrew.sh << 'EOF'
+#!/usr/bin/env bash
 
-cat >"${PROFILE_SCRIPT}" <<'EOF'
-if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    
-    # For non-linuxbrew users, provide a wrapper to run brew as linuxbrew user
-    if [ "${USER}" != "linuxbrew" ]; then
-        brew() {
-            sudo --user linuxbrew --login brew "$@"
-        }
-    fi
-fi
+[ ! -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && return
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+[ "$USER" = "linuxbrew" ] && return
+
+brew() {
+    sudo --user linuxbrew --login brew "$@"
+}
 EOF
 
-# Set appropriate permissions
-chmod 644 "${PROFILE_SCRIPT}"
-
-echo "Homebrew environment configuration has been installed to ${PROFILE_SCRIPT}"
-echo "The changes will take effect on next login or shell restart."
+sudo chmod +x /etc/profile.d/homebrew.sh
