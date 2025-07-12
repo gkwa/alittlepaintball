@@ -9,7 +9,7 @@ sudo tee /etc/profile.d/homebrew.sh <<'EOF'
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-[ "$USER" = "linuxbrew" ] && return
+[ "${USER:-}" = "linuxbrew" ] && return
 
 brew() {
     sudo --user linuxbrew --login brew "$@"
